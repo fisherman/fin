@@ -17,6 +17,8 @@ Install with [Fisher](https://github.com/jorgebucaran/fisher):
 fisher install jorgebucaran/nvm.fish
 ```
 
+> **msys2/mingw** users will need to install unzip if not already installed.
+
 ## Quickstart
 
 Install the latest Node release and activate it.

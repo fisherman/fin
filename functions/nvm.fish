@@ -50,7 +50,7 @@ function nvm --argument-names cmd v --description "Node version manager"
                     case sunos
                     case linux
                     case darwin
-                    case {MSYS_NT,MINGW\*_NT}\*
+                    case {msys_nt,mingw\*_nt}\*
                         set os win
                         set ext zip
                     case \*
@@ -80,13 +80,22 @@ function nvm --argument-names cmd v --description "Node version manager"
 
                 set --local dir "node-$v-$os-$arch"
                 set --local url $nvm_mirror/$v/$dir.$ext
+                test "$os" = win && set --local tmp_exe $TMP/(command date +"%s")-$dir.$ext
 
                 command mkdir -p $nvm_data/$v
 
                 echo -e "Installing Node \x1b[1m$v\x1b[22m $alias"
                 echo -e "Fetching \x1b[4m$url\x1b[24m\x1b[7m"
+                if test "$os" = win
+                    if ! command curl --progress-bar --location $url -o $tmp_exe
+                        command rm -rf $nvm_data/$v
+                        echo -e "\033[F\33[2K\x1b[0mnvm: Invalid mirror or host unavailable: \"$url\"" >&2
+                        return 1
+                    end
 
-                if ! command curl --progress-bar --location $url \
+                    command unzip -qq -o -d $nvm_data/$v $tmp_exe
+                    rm -rf $tmp_exe
+                else if ! command curl --progress-bar --location $url \
                         | command tar --extract --gzip --directory $nvm_data/$v 2>/dev/null
                     command rm -rf $nvm_data/$v
                     echo -e "\033[F\33[2K\x1b[0mnvm: Invalid mirror or host unavailable: \"$url\"" >&2
